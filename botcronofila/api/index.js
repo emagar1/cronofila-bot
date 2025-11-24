@@ -1,25 +1,25 @@
+// api/index.js (Vercel Serverless Function en CommonJS)
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
-// api/index.js (Vercel Serverless Function)
-import fetch from 'node-fetch';
-import * as cheerio from 'cheerio';
-
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   const { url } = req.query;
   if (!url) return res.status(400).json({ error: "Missing url" });
 
   try {
-    const html = await fetch(url).then(r => r.text());
+    const response = await fetch(url);
+    const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Basic extraction example (modify as needed)
     const data = {
       title: $("title").text() || null,
       h1: $("h1").first().text() || null,
-      bodyText: $("body").text().trim().slice(0,300) // preview
+      bodyText: $("body").text().trim().slice(0, 300)
     };
 
-    res.json({ ok: true, data });
+    return res.status(200).json({ ok: true, data });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
-}
+};
+
